@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Projet : {{ projet.nom }}</h2>
+<p>{{ projet.description }}</p>
+<a href="{% url 'ajouter_tache' projet.id %}" class="btn btn-primary">Ajouter une tâche</a>
+
+<table class="table mt-3">
+  <thead>
+    <tr>
+      <th>Titre</th>
+      <th>Statut</th>
+      <th>Échéance</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tache in taches %}
+    <tr>
+      <td>{{ tache.titre }}</td>
+      <td>{{ tache.get_statut_display }}</td>
+      <td>{{ tache.date_limite }}</td>
+      <td>
+        <a href="{% url 'modifier_tache' tache.id %}" class="btn btn-sm btn-warning">Modifier</a>
+        <a href="{% url 'supprimer_tache' tache.id %}" class="btn btn-sm btn-danger">Supprimer</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

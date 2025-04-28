@@ -1,3 +1,61 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Projet, Tache
+from .forms import ProjetForm, TacheForm
+from django.contrib.auth.decorators import login_required
 
-# Create your views here.
+@login_required
+def accueil(request):
+    projets = Projet.objects.filter(proprietaire=request.user)
+    return render(request, 'accueil.html', {'projets': projets})
+
+@login_required
+def ajouter_projet(request):
+    if request.method == 'POST':
+        form = ProjetForm(request.POST)
+        if form.is_valid():
+            projet = form.save(commit=False)
+            projet.proprietaire = request.user
+            projet.save()
+            return redirect('accueil')
+    else:
+        form = ProjetForm()
+    return render(request, 'ajouter_projet.html', {'form': form})
+
+@login_required
+def projet_detail(request, projet_id):
+    projet = get_object_or_404(Projet, id=projet_id)
+    taches = Tache.objects.filter(projet=projet)
+    return render(request, 'projet_detail.html', {'projet': projet, 'taches': taches})
+
+@login_required
+def ajouter_tache(request, projet_id):
+    projet = get_object_or_404(Projet, id=projet_id)
+    if request.method == 'POST':
+        form = TacheForm(request.POST)
+        if form.is_valid():
+            tache = form.save(commit=False)
+            tache.projet = projet
+            tache.save()
+            return redirect('projet_detail', projet_id=projet.id)
+    else:
+        form = TacheForm()
+    return render(request, 'ajouter_tache.html', {'form': form})
+
+@login_required
+def modifier_tache(request, tache_id):
+    tache = get_object_or_404(Tache, id=tache_id)
+    if request.method == 'POST':
+        form = TacheForm(request.POST, instance=tache)
+        if form.is_valid():
+            form.save()
+            return redirect('projet_detail', projet_id=tache.projet.id)
+    else:
+        form = TacheForm(instance=tache)
+    return render(request, 'modifier_tache.html', {'form': form, 'tache': tache})
+
+@login_required
+def supprimer_tache(request, tache_id):
+    tache = get_object_or_404(Tache, id=tache_id)
+    projet_id = tache.projet.id
+    tache.delete()
+    return redirect('projet_detail', projet_id=projet_id)

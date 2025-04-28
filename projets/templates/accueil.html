@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Mes Projets</h2>
+<a href="{% url 'ajouter_projet' %}" class="btn btn-success mb-3">+ Créer un projet</a>
+<ul class="list-group">
+  {% for projet in projets %}
+    <li class="list-group-item">
+      <a href="{% url 'projet_detail' projet.id %}">{{ projet.nom }}</a>
+    </li>
+  {% empty %}
+    <li class="list-group-item">Aucun projet pour l'instant.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
