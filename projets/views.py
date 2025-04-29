@@ -3,7 +3,7 @@ from .models import Projet, Tache
 from .forms import ProjetForm, TacheForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
-
+import uuid
 
 
 def login_view(request):
@@ -31,13 +31,15 @@ def ajouter_projet(request):
     if request.method == 'POST':
         form = ProjetForm(request.POST)
         if form.is_valid():
-            projet = form.save(commit=False)
-            projet.proprietaire = request.user
-            projet.save()
-            return redirect('accueil')
+            projet = form.save(commit=False)  # NE PAS sauver directement
+            projet.code = str(uuid.uuid4())[:8]  # Générer un code aléatoire court
+            projet.proprietaire = request.user  # Mettre le user connecté
+            projet.save()  # Maintenant on peut enregistrer
+            return redirect('liste_projets')  # ou autre page
     else:
         form = ProjetForm()
     return render(request, 'ajouter_projet.html', {'form': form})
+
 
 @login_required
 def projet_detail(request, projet_id):
@@ -77,3 +79,14 @@ def supprimer_tache(request, tache_id):
     projet_id = tache.projet.id
     tache.delete()
     return redirect('projet_detail', projet_id=projet_id)
+
+
+
+def liste_projets(request):
+    projets = Projet.objects.all()
+    return render(request, 'liste_projets.html', {'projets': projets})
+
+
+def logout_view(request):
+    logout(request) 
+    return redirect('login')
