@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Projet, Tache
 from .forms import ProjetForm, TacheForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login , logout
 import uuid
 
 
@@ -87,6 +87,3 @@ def liste_projets(request):
     return render(request, 'liste_projets.html', {'projets': projets})
 
 
-def logout_view(request):
-    logout(request) 
-    return redirect('login')
